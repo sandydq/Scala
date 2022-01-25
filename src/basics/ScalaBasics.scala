@@ -5,11 +5,18 @@ import java.io.File._ //All static methods inside File class
 import java.util.{HashMap, Map} //Only these two classes
 
 object ScalaBasics extends App {
-  println("------------------------Variables---------------------------")
+  println("------------------------Variables & Initialization---------------------------")
   val immutableMsg = "Hi Sandy" //Immutable
   println(immutableMsg)
   var mutableMsg = "How are you" //Mutable
   println(mutableMsg)
+
+  //default value can be initialized using "_", its only applicable to var. we cant use in val because val is a final so
+  //we need to instantiate value when we declaring the variable.
+  var intValue: Int = _
+  var stringValue: String = _
+  println(s"Default value: IntValue - $intValue, StringValue - $stringValue")
+
   //The compiler does not immediately evaluate the bound expression of a lazy val. It evaluates the variable only on its first access.
   lazy val lazyMsg = {
     println("Initializing lazy value ");
@@ -18,6 +25,7 @@ object ScalaBasics extends App {
   println(lazyMsg)
 
   println("------------------------Rich Operations---------------------------")
+  //Scala provides "rich wrapper" around basic type via implicit conversions
   val max = 0 max 5
   println(s"max - $max")
   val min = 0 min 5
@@ -151,7 +159,7 @@ object ScalaBasics extends App {
   val sumOfThreeNumbers = sum(5, _: Int, 5)
   println(s"sumOfThreeNumbers -" + sumOfThreeNumbers(5))
 
-  def transform(firstName: String, lastName: String) = firstName.capitalize+" "+lastName.capitalize
+  def transform(firstName: String, lastName: String) = firstName.capitalize + " " + lastName.capitalize
 
   val stringTransform = transform("santhosh", _: String)
   println(s"stringTransform - " + stringTransform("parithi"))
@@ -162,4 +170,3 @@ class Marshaller[T] {
     println(t)
   }
 }
-
