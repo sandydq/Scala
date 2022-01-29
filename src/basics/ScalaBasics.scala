@@ -1,8 +1,10 @@
 package basics
 
-import java.io._ //All classes under io
-import java.io.File._ //All static methods inside File class
-import java.util.{HashMap, Map} //Only these two classes
+import java.io._
+import java.io.File._
+import java.util
+import java.util.{HashMap, Map}
+import scala.annotation.tailrec //Only these two classes
 
 //If we extends the App, everything we write inside will be consider inside a main method
 object ScalaBasics extends App {
@@ -127,6 +129,23 @@ object ScalaBasics extends App {
 
   println("------------------------Curried functions---------------------------")
 
+  /*Currying is the process of converting a function with multiple arguments into a sequence of functions that take
+  one argument. Each function returns another function that consumes the following argument.*/
+  def find[A](xs: List[A])(predicate: A => Boolean): Option[A] = {
+    xs match {
+      case Nil => None
+      case head :: tail => if (predicate(head)) Option(head) else find(tail)(predicate)
+    }
+  }
+
+  val sample = find(List(1, 2, 3, 4, 5))(x => x % 2 == 0)
+
+  val sumVariable: (Int, Int, Int) => Int = (x, y, z) => x + y + z
+  val curriedSum: Int => Int => Int = x => y => x + y
+  val curriedSumWithCurriedMethod: Int => Int => Int => Int = sumVariable.curried
+  println("Curried function Basic Example - " + curriedSum(5)(5))
+  println("Curried function Basic Example with curried method - " + curriedSumWithCurriedMethod(10)(10)(5))
+
   def calculator(operation: Double => Double)(n: Double) = operation(n)
 
   val multiplyBy5 = calculator(x => x * 5)(5)
@@ -177,6 +196,12 @@ object ScalaBasics extends App {
 
   callByValue(5 + callByValueVariable)
 
+  def callByValueRandom(x: Int) = {
+    println(s"call by value random 1 - $x and call by value random 2 - $x")
+  }
+
+  callByValueRandom(scala.util.Random.nextInt())
+
   var callByNameVariable = 10
 
   def callByName(x: => Int): Unit = {
@@ -186,6 +211,12 @@ object ScalaBasics extends App {
   }
 
   callByName(5 + callByNameVariable) // evaluates the function first, and then evaluates the arguments if need be(if function body doesn't use the respective variable ex., x)
+
+  def callByNameRandom(x: => Int) = {
+    println(s"call by name random 1 - $x and call by name random 2 - $x")
+  }
+
+  callByNameRandom(scala.util.Random.nextInt())
 
   def variableArguments(va: Int*): Unit = {
     println("Size of parameters " + va.size)
@@ -226,6 +257,8 @@ object ScalaBasics extends App {
   val hof4 = hofTakingParameterAsArgumentAndReturn(x => x.split(" ").map(x => x.toUpperCase).mkString(" "), notNullFunction)
   println("Higher Order Function Taking Function and Returning Function - " + hof3("santhosh", null, "parithi"))
   println("Higher Order Function Taking Function and Returning Function 2  - " + hof4("santhosh", "parithi", "arcot"))
+
+
 }
 
 class Marshaller[T] {
