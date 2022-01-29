@@ -4,6 +4,7 @@ import java.io._ //All classes under io
 import java.io.File._ //All static methods inside File class
 import java.util.{HashMap, Map} //Only these two classes
 
+//If we extends the App, everything we write inside will be consider inside a main method
 object ScalaBasics extends App {
   println("------------------------Variables & Initialization---------------------------")
   val immutableMsg = "Hi Sandy" //Immutable
