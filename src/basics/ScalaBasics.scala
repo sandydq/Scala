@@ -164,6 +164,68 @@ object ScalaBasics extends App {
 
   val stringTransform = transform("santhosh", _: String)
   println(s"stringTransform - " + stringTransform("parithi"))
+
+  println("------------------------Call by value, call by name and variable arguments---------------------------")
+
+  var callByValueVariable = 10
+
+  def callByValue(x: Int): Unit = { //Its like a normal function
+    println("Call by value 1 - " + x)
+    callByValueVariable = x
+    println("Call by value 2 - " + x)
+  }
+
+  callByValue(5 + callByValueVariable)
+
+  var callByNameVariable = 10
+
+  def callByName(x: => Int): Unit = {
+    println("Call by name 1 - " + x)
+    callByNameVariable = x;
+    println("Call by name 2 - " + x)
+  }
+
+  callByName(5 + callByNameVariable) // evaluates the function first, and then evaluates the arguments if need be(if function body doesn't use the respective variable ex., x)
+
+  def variableArguments(va: Int*): Unit = {
+    println("Size of parameters " + va.size)
+  }
+
+  variableArguments(1, 2)
+
+  println("------------------------Higher order function---------------------------")
+  /*Simply put, we can say that a function is higher-order if it meets one or both of the following conditions:
+
+    it takes one or more functions as parameters
+    it returns a function
+    */
+
+  def higherOrderFunctionTakingFunctionAsArgument(f: (Int, Int) => Int)(a1: Int): Int = {
+    f(a1, a1 + 1)
+  }
+
+  val hof1 = higherOrderFunctionTakingFunctionAsArgument((x, y) => x + y)(5)
+  println(s"Higher Order Function Taking Function As Argument - " + hof1)
+
+  def higherOrderFunctionReturningFunction(ops: String): (String, String) => String = (x: String, y: String) =>
+    ops match {
+      case "-" => x + "-" + y
+      case "," => x + "," + y
+      case _ => x + " " + y
+    }
+
+  val hof2 = higherOrderFunctionReturningFunction("Sandy") // Try with "-", ","
+  println("Higher Order Function Returning Function - " + hof2("Santhosh", "Parithi"))
+
+  def hofTakingParameterAsArgumentAndReturn(ops1: String => String, ops2: List[String] => Int): (String, String, String) => (String, Int) = { (firstName: String, middleName: String, lastName: String) =>
+    (ops1(firstName + " " + middleName + " " + lastName), ops2(List(firstName, middleName, lastName)))
+  }
+
+  val notNullFunction: List[String] => Int = _.count(_ != null)
+  val hof3 = hofTakingParameterAsArgumentAndReturn(x => x.split(" ").map(x => if (!x.equalsIgnoreCase("null")) x.capitalize else "").mkString(" "), notNullFunction)
+  val hof4 = hofTakingParameterAsArgumentAndReturn(x => x.split(" ").map(x => x.toUpperCase).mkString(" "), notNullFunction)
+  println("Higher Order Function Taking Function and Returning Function - " + hof3("santhosh", null, "parithi"))
+  println("Higher Order Function Taking Function and Returning Function 2  - " + hof4("santhosh", "parithi", "arcot"))
 }
 
 class Marshaller[T] {
