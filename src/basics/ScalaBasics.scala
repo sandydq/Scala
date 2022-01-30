@@ -127,40 +127,6 @@ object ScalaBasics extends App {
   println(s"tupes_2 - ${tuples._2}")
   //println(tuples(0)) --> Compile error, its not like list. so we can't call like this.
 
-  println("------------------------Curried functions---------------------------")
-
-  /*Currying is the process of converting a function with multiple arguments into a sequence of functions that take
-  one argument. Each function returns another function that consumes the following argument.*/
-  def find[A](xs: List[A])(predicate: A => Boolean): Option[A] = {
-    xs match {
-      case Nil => None
-      case head :: tail => if (predicate(head)) Option(head) else find(tail)(predicate)
-    }
-  }
-
-  val sample = find(List(1, 2, 3, 4, 5))(x => x % 2 == 0)
-
-  val sumVariable: (Int, Int, Int) => Int = (x, y, z) => x + y + z
-  val curriedSum: Int => Int => Int = x => y => x + y
-  val curriedSumWithCurriedMethod: Int => Int => Int => Int = sumVariable.curried
-  println("Curried function Basic Example - " + curriedSum(5)(5))
-  println("Curried function Basic Example with curried method - " + curriedSumWithCurriedMethod(10)(10)(5))
-
-  def calculator(operation: Double => Double)(n: Double) = operation(n)
-
-  val multiplyBy5 = calculator(x => x * 5)(5)
-  println(s"curried function : multiplyBy5 - $multiplyBy5")
-  val safeMinusBy5 = calculator(x => if (x > 5) x - 5 else x)(9)
-  println(s"curried function : safeMinusBy5 - $safeMinusBy5")
-
-  def multipleOf(operation: (Double, Double) => Double)(n1: Double, n2: Double) = operation(n1, n2)
-
-  val multipleOf4And5 = multipleOf((x, y) => x * y)(4, 5)
-  println(s"curried function : multipleOf4&5 - $multipleOf4And5")
-
-  val multipleOf8And8 = multipleOf((x, y) => x * y)(8, 8)
-  println(s"curried function : multipleOf8&8 - $multipleOf8And8")
-
   println("------------------------Function Literals---------------------------")
   println((1 to 10).toList.filter(_ % 2 == 0))
 
