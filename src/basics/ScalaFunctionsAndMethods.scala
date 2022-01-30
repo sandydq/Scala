@@ -97,7 +97,7 @@ object ScalaFunctionsAndMethods extends App {
   //We extended it from AnyVal type, and unnecessary object allocation will be avoided
   //To define an implicit conversion, we have to mark a class as implicit. This allow all methods inside a class to become implicitly accessible
   implicit class IntTypeExtension(val value: Int) extends AnyVal { // Here we wrapping around type of Int
-    def isOdd = value % 2 != 0
+    def isOdd: Boolean = value % 2 != 0
   }
 
   //Int value 10 doesn't have an explicit method isOdd, but IntTypeExtension class does. The compiler will search for an implicit
@@ -105,7 +105,7 @@ object ScalaFunctionsAndMethods extends App {
   println("Extension method for type INT - " + 10.isOdd)
 
   implicit class StringTypeExtension(val value: String) extends AnyVal {
-    def capitalizeAlternateWord = {
+    def capitalizeAlternateWord: String = {
       var count = 0
       val upperOrLowerFunction: (Char => Char) => Char => Char = (fp: Char => Char) => cha => {
         count = count.+(1)
@@ -123,7 +123,7 @@ object ScalaFunctionsAndMethods extends App {
 }
 
 class Sample {
-  def sample() = {
+  def sample(): Boolean = {
     10.isOdd
   }
 }
