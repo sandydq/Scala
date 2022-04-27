@@ -83,6 +83,34 @@ object PatternMatching extends App {
     })
   }
 
+  println("---------------------------------More on Type Matching---------------------------------------")
+  for {
+    x <- Seq(List(5.5,5.6,5.7), List("a", "b"))
+  } {
+    println(x match {
+      case seqD: Seq[Double] => ("seq double", seqD)
+      case seqS: Seq[String] => ("seq string", seqS)
+      case _ => ("unknown!", x)
+    })
+  } //This code will give warning by a compiler. Because compiler will know given object is a List, it can't check at runtime that its a List[Double] or a List[String]
+
+  //Effective workaround is to match on the collection first, then use a nested match on the head of the element to determine the type
+  def doSeqMatch[T](seq: Seq[T]): String = seq match {
+    case Nil => "Nothing"
+    case head +: _ => head match {
+      case _ : Double => "Double"
+      case _ : String => "String"
+      case _ => "Unmatched seq element"
+    }
+  }
+
+  for (x <- Seq(List(5.5,5.6,5.7), List("a","b"), Nil)) {
+    println(x match {
+      case seq : Seq[_] => (s"seq ${doSeqMatch(x)}", seq)
+      case _ => ("unknown!", x)
+    })
+  }
+
   //Matching on Sequences
   println("------------------Matching on Sequences-------------------")
   val nonEmptySeq = Seq(1,2,3,4,5)
@@ -162,8 +190,21 @@ object PatternMatching extends App {
       case Person("Alice", 25, Address(_, "Chicago", _)) => println("Hi Alice!")
       case Person("Bob", 29, Address("2 Java Ave.", "Miami", "USA")) => println("Hi Bob!")
       case Person(name, age, _) => println(s"Who are you, $age year-old person named $name?")
+
+      case p @ Person("Alice", 25, address) => println(s"Hi Alice! $p")
+      case p @ Person("Bob", 29,a @ Address(street, city, country)) => println(s"Hi ${p.name}! age ${p.age}, in ${a.city}")
+      case p @ Person(name, age, _) => println(s"Who are you, $age year-old person named $name? ${p.address.city}")
     }
   }
+
+  for (person <- alice +: bob +: charlie +: Nil) {
+    person match { //whenever we pattern match the case class, it will call unapply(deconstruct method) to convert Object into tuple
+      case p @ Person("Alice", 25, address) => println(s"Hi Alice! $p")
+      case p @ Person("Bob", 29,a @ Address(street, city, country)) => println(s"Hi ${p.name}! age ${p.age}, in ${a.city}")
+      case p @ Person(name, age, _) => println(s"Who are you, $age year-old person named $name? ${p.address.city}")
+    }
+  }
+  //If we are not extracting fields from the Person instance, we can just wrote p: Person => ...
 
   println("-------------------------------------------zipWithIndex------------------------------------------")
   //Seq.zipWithIndex
@@ -261,5 +302,22 @@ object PatternMatching extends App {
       case _ => println(s"ERROR: Unknown expression: $where")
     }
   }
+
+  println("---------------------------------Matching on Regular Expressions------------------------------")
+  val BookExtractorRE = """Book: title=([^,]+),\s+author=(.+)""".r
+  val MagazineExtractorRE = """Magazine: title=([^,]+),\s+issue=(.+)""".r()
+
+  val catalog = Seq(
+    "Book: title=Programming Scala Second Edition, author=Dean Wampler",
+    "Magazine: title=The New Yorker, issue=January 2014",
+    "Unknown: text=Who put this here??")
+
+    for (item <- catalog) {
+      item match {
+        case BookExtractorRE(title, author) => println(s"""Book "$title", written by $author""")
+        case MagazineExtractorRE(title, issue) => println(s"""Magazine "$title", issue $issue""")
+        case entry => println(s"Unrecognized entry: $entry")
+      }
+    }
 }
 
