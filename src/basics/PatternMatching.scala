@@ -48,7 +48,7 @@ object PatternMatching extends App {
   //compiler assumes term starts with capital letter is a type name.
   //while term begins with a lowercase letter is assumed as a name of the variable that will hold
   //an extracted or matched value
-  def checkY(y: Int) = {
+  def checkY(y: Int): Unit = {
     for {
       x <- Seq(99, 100, 101)
     } {
@@ -61,7 +61,7 @@ object PatternMatching extends App {
   }
   checkY(100)
 
-  def checkY2(y: Int) = {
+  def checkY2(y: Int): Unit = {
     for {
       x <- Seq(99, 100, 101)
     } {
@@ -190,10 +190,6 @@ object PatternMatching extends App {
       case Person("Alice", 25, Address(_, "Chicago", _)) => println("Hi Alice!")
       case Person("Bob", 29, Address("2 Java Ave.", "Miami", "USA")) => println("Hi Bob!")
       case Person(name, age, _) => println(s"Who are you, $age year-old person named $name?")
-
-      case p @ Person("Alice", 25, address) => println(s"Hi Alice! $p")
-      case p @ Person("Bob", 29,a @ Address(street, city, country)) => println(s"Hi ${p.name}! age ${p.age}, in ${a.city}")
-      case p @ Person(name, age, _) => println(s"Who are you, $age year-old person named $name? ${p.address.city}")
     }
   }
 
@@ -305,7 +301,7 @@ object PatternMatching extends App {
 
   println("---------------------------------Matching on Regular Expressions------------------------------")
   val BookExtractorRE = """Book: title=([^,]+),\s+author=(.+)""".r
-  val MagazineExtractorRE = """Magazine: title=([^,]+),\s+issue=(.+)""".r()
+  val MagazineExtractorRE = """Magazine: title=([^,]+),\s+issue=(.+)""".r
 
   val catalog = Seq(
     "Book: title=Programming Scala Second Edition, author=Dean Wampler",
@@ -319,5 +315,101 @@ object PatternMatching extends App {
         case entry => println(s"Unrecognized entry: $entry")
       }
     }
+
+  println("---------------------------------Sealed Hierarchies and Exhaustive Matches------------------------------------")
+  sealed abstract class HttpMethod() {
+    def body: String
+    def bodyLength: Int = body.length
+  }
+
+  case class Connect(body: String) extends HttpMethod
+  case class Delete(body: String) extends HttpMethod
+  case class Get(body: String) extends HttpMethod
+  case class Head(body: String) extends HttpMethod
+  case class Options(body: String) extends HttpMethod
+  case class Post(body: String) extends HttpMethod
+  case class Put(body: String) extends HttpMethod
+  case class Trace(body: String) extends HttpMethod
+
+  def handle(method: HttpMethod) = method match {
+    case Connect(body) => s"Connect: (length: ${method.bodyLength}) $body"
+    case Delete(body) => s"Connect: (length: ${method.bodyLength}) $body"
+    case Get(body) => s"Connect: (length: ${method.bodyLength}) $body"
+    case Head(body) => s"Connect: (length: ${method.bodyLength}) $body"
+    case Options(body) => s"Connect: (length: ${method.bodyLength}) $body"
+    case Post(body) => s"Connect: (length: ${method.bodyLength}) $body"
+    case Put(body) => s"Connect: (length: ${method.bodyLength}) $body"
+    case Trace(body) => s"Connect: (length: ${method.bodyLength}) $body"
+  }
+
+  val methods = Seq(
+    Connect("connect body..."),
+    Delete("delete body..."),
+    Get("get body..."),
+    Head("head body..."),
+    Options("options body..."),
+    Post("post body..."),
+    Put("put body..."),
+    Trace("trace body..."))
+  methods foreach (method => println(handle(method)))
+
+  println("---------------------------------Other Uses of Pattern Matching------------------------------------")
+  //The powerful feature is not limited to case clauses. you can use pattern matching when defining values, including in for comprehensions
+
+  val Person(name, age, Address(_, state, _)) = Person("Dean", 29, Address("1 Scala Way", "CA", "USA"))
+  println(s"name - $name, age - $age, state - $state")
+
+  val head +: tail = List(1,2,3,4)
+  println(s"head - $head, tail - $tail")
+
+  val head1 +: head2 +: tail2 = List(1,2,3,4)
+  println(s"head1 - $head1, head2 - $head2, tail1 - $tail2")
+
+  val Seq(a,b,c) = Seq(1,2,3)
+  println(s"a - $a, b - $b, c - $c")
+
+  try {
+    val Seq(a1,b2,c2) = Seq(1,2,3,4) //MatchError - Solution - Seq(a1, b1, vals @_*)
+  } catch {
+    case e: Exception => println(s"Exception - ${e.getLocalizedMessage}")
+  }
+
+  val p = Person("Dean", 29, Address("1 Scala Way", "CA", "USA"))
+  println(if (p == Person("Dean", 29, Address("1 Scala Way", "CA", "USA"))) "yes" else "no")
+  println(if (p == Person("1 Scala Way", 29, Address("1 Scala Way", "CA", "USA"))) "yes" else "no")
+
+  //_ placeholder wont work here
+  //  println(if (p == Person(_, 29, Address(_, _, "USA"))) "yes" else "no") -> error
+
+  def sum_count(ints: Seq[Int]) = (ints.sum, ints.size)
+  val (sum, count) = sum_count(List(1,2,3,4))
+  println(s"sum $sum and size $count")
+
+  val dogBreeds = Seq(Some("Doberman"), None, Some("Yorkshire Terrier"), Some("Dachshund"), None, Some("Scottish Terrier"),
+    None, Some("Great Dane"), Some("Portuguese Water Dog"))
+
+  for {
+    Some(breed) <- dogBreeds //Only gets Some(values)
+    uppercaseBreed = breed.toUpperCase
+  } println(uppercaseBreed)
+
+  case class Person2(name: String, age: Int)
+  val as = Seq(Address("1 Scala Lane", "Anytown", "USA"), Address("2 Clojure Lane", "Othertown", "USA"))
+  val ps = Seq(Person2("Black Trends", 29), Person2("Clo Jure", 20))
+
+  val pas = ps zip as //ps and as length should be same. if 'ps' size is 5 and 'as' size as 6, it will take first 5 elements for 'as'
+
+  //ugly way
+  println(pas map { tup =>
+    val Person2(name,age) = tup._1
+    val Address(street, city, country) = tup._2
+    s"$name (age: $age) lives at $street, $city, in $country"
+  })
+
+  //Nicer way
+  println(pas map {
+    case (Person2(name, age), Address(street, city, country)) => s"$name (age: $age) lives at $street, $city, in $country"
+  })
+
 }
 
